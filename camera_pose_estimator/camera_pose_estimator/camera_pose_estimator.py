@@ -122,9 +122,7 @@ class CameraPoseEstimator():
 
 
     def init_tf(self):
-        self.tf_broadcasters = {}
-        for tag_id in self.tags_ids:
-            self.tf_broadcasters[tag_id] = TransformBroadcaster(self.node)
+        self.tf_broadcaster = TransformBroadcaster(self.node)
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self.node)
 
@@ -135,9 +133,7 @@ class CameraPoseEstimator():
         rclpy.shutdown()
 
 
-    def broadcast_tf(self, parent_frame, child_frame, transform):
-        trans = tf_transformations.translation_from_matrix(transform)
-        rot = tf_transformations.quaternion_from_matrix(transform)
+    def broadcast_tf(self, parent_frame, child_frame, trans, rot):
         t = TransformStamped()
         t.header.stamp = self.node.get_clock().now().to_msg()
         t.header.frame_id = parent_frame
@@ -149,7 +145,7 @@ class CameraPoseEstimator():
         t.transform.rotation.y = rot[1]
         t.transform.rotation.z = rot[2]
         t.transform.rotation.w = rot[3]
-        self.tf_broadcasters[1].sendTransform(t)
+        self.tf_broadcaster.sendTransform(t)
 
     def listener_callback(self, msg: AprilTagDetectionArray):
         detections_count = 0
@@ -163,82 +159,24 @@ class CameraPoseEstimator():
                         f'tag36h11:{tag_id}_',
                         'camera_link',
                         rclpy.time.Time() )
-                    frame_trans = tf_transformations.translation_matrix([
-                                        frame_trans_msg.transform.translation.x,
-                                        frame_trans_msg.transform.translation.y,
-                                        frame_trans_msg.transform.translation.z 
-                                    ])
-                    frame_rot = tf_transformations.quaternion_matrix([
-                                        frame_trans_msg.transform.rotation.x,
-                                        frame_trans_msg.transform.rotation.y,
-                                        frame_trans_msg.transform.rotation.z,
-                                        frame_trans_msg.transform.rotation.w 
-                                    ])
-                    frame_transform = tf_transformations.concatenate_matrices(frame_trans, frame_rot)
                 except TransformException:
                     continue
-                frame_transform_trans = tf_transformations.translation_from_matrix(frame_transform)
-                frame_transform_rot = tf_transformations.quaternion_from_matrix(frame_transform)
-                frame_transform_trans[0] += self.tags_x_dict[tag_id]
-                frame_transform_trans[1] += self.tags_y_dict[tag_id]
-                frame_trans = tf_transformations.translation_matrix(frame_transform_trans)
-                frame_rot = tf_transformations.quaternion_matrix(frame_transform_rot)
-                frame_transform_2 = tf_transformations.concatenate_matrices(frame_trans, frame_rot)
-                self.broadcast_tf('world', 'camera_link', frame_transform_2)
+                detections_count += 1
+                cum_trans += [ frame_trans_msg.transform.translation.x + self.tags_x_dict[tag_id],
+                                frame_trans_msg.transform.translation.y + self.tags_y_dict[tag_id],
+                                frame_trans_msg.transform.translation.z ]
+                cum_rot_euler += tf_transformations.euler_from_quaternion(
+                        [ frame_trans_msg.transform.rotation.x,
+                          frame_trans_msg.transform.rotation.y,
+                          frame_trans_msg.transform.rotation.z,
+                          frame_trans_msg.transform.rotation.w  ] )
 
-        #     if detection.id in self.tf_broadcasters:
-        #         detections_count += 1
-        #         
-        #         trans = tf_transformations.translation_matrix([
-        #                 detection.pose.pose.pose.position.x,
-        #                 detection.pose.pose.pose.position.y,
-        #                 detection.pose.pose.pose.position.z 
-        #             ])
-        #         rot = tf_transformations.quaternion_matrix([
-        #                 detection.pose.pose.pose.orientation.x,
-        #                 detection.pose.pose.pose.orientation.y,
-        #                 detection.pose.pose.pose.orientation.z,
-        #                 detection.pose.pose.pose.orientation.w,
-        #             ])
-        #         Ry = tf_transformations.rotation_matrix(np.pi/2, (0,1,0))
-        #         transform = tf_transformations.concatenate_matrices(trans, rot, Ry)
-
-        #         # trans = tf_transformations.translation_from_matrix(transform)
-        #         # rot = tf_transformations.quaternion_from_matrix(transform)
-        #         inversed_transform = tf_transformations.inverse_matrix(transform)
-
-        #         Rx = tf_transformations.rotation_matrix(np.pi/2, (1,0,0))
-        #         Rz = tf_transformations.rotation_matrix(np.pi/2, (0,0,1))
-        #         inversed_transform = tf_transformations.concatenate_matrices(inversed_transform, Rx, Rz)
-                
-        #         trans_inv = tf_transformations.translation_from_matrix(inversed_transform)
-        #         rot_inv = tf_transformations.quaternion_from_matrix(inversed_transform)
-        #         rot_inv_euler = tf_transformations.euler_from_quaternion(rot_inv)
-
-        #         cum_trans[0] += trans_inv[0] + self.tags_x_dict[tag_id]
-        #         cum_trans[1] += trans_inv[1] + self.tags_y_dict[tag_id]
-        #         cum_trans[2] += trans_inv[2]
-        #         cum_rot_euler[0] += rot_inv_euler[0]
-        #         cum_rot_euler[1] += rot_inv_euler[1]
-        #         cum_rot_euler[2] += rot_inv_euler[2]
-
-        # if detections_count>0:
-        #     avg_trans = cum_trans / detections_count
-        #     avg_rot_euler = cum_rot_euler / detections_count
-        #     avg_rot = tf_transformations.quaternion_from_euler(
-        #             avg_rot_euler[0], avg_rot_euler[1], avg_rot_euler[2])
-        #     t = TransformStamped()
-        #     t.header.stamp = self.node.get_clock().now().to_msg()
-        #     t.header.frame_id = self.base_frame
-        #     t.child_frame_id = f'{self.camera_frame}'
-        #     t.transform.translation.x = avg_trans[0]
-        #     t.transform.translation.y = avg_trans[1]
-        #     t.transform.translation.z = avg_trans[2]
-        #     t.transform.rotation.x = avg_rot[0]
-        #     t.transform.rotation.y = avg_rot[1]
-        #     t.transform.rotation.z = avg_rot[2]
-        #     t.transform.rotation.w = avg_rot[3]
-        #     self.tf_broadcasters[tag_id].sendTransform(t)
+        if detections_count>0:
+            avg_trans = cum_trans / detections_count
+            avg_rot_euler = cum_rot_euler / detections_count
+            avg_rot = tf_transformations.quaternion_from_euler(
+                    avg_rot_euler[0], avg_rot_euler[1], avg_rot_euler[2])
+            self.broadcast_tf('world', 'camera_link', avg_trans, avg_rot)
 
 
 
