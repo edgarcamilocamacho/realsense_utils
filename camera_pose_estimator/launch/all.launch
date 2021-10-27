@@ -1,0 +1,20 @@
+<launch>
+
+    <!-- Camera -->
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+        <arg name="output" value="log"/>
+        <arg name="align_depth" value="true"/>
+    </include>
+
+    <!-- AprilTag -->
+    <include file="$(find camera_pose_estimator)/launch/continuous_detection.launch">
+    </include>
+
+    <!-- Pose Estimator -->
+    <include file="$(find camera_pose_estimator)/launch/camera_pose_estimator.launch">
+    </include>
+
+    <!-- Rviz -->
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find camera_pose_estimator)/rviz/camera_pose_estimator.rviz" />
+
+</launch>

@@ -43,18 +43,17 @@ catkin_make
 
 ## Run
 
-Realsense:
+Run all:
+
+``` bash
+roslaunch camera_pose_estimator all.launch
+```
+
+It's equivalent to run:
 
 ``` bash
 roslaunch realsense2_camera rs_camera.launch
-```
-
-``` bash
 roslaunch camera_pose_estimator continuous_detection.launch
+roslaunch camera_pose_estimator camera_pose_estimator.launch
+# Rviz with the config file
 ```
-
-``` bash
-rosrun camera_pose_estimator apriltags_tf.py
-```
-
-Then check in rviz.
