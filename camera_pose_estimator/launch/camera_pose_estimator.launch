@@ -1,0 +1,5 @@
+<launch>
+    <rosparam file="$(find camera_pose_estimator)/config/camera_pose_estimator_params.yaml" />
+    <node name="camera_pose_estimator" pkg="camera_pose_estimator" type="apriltags_tf.py" output="screen">
+    </node>
+</launch>

@@ -54,6 +54,7 @@ class CameraPoseEstimator():
 		print(self.base_frame)
 
 	def static_tf(self):
+		self.tf_static_publishers = []
 		static_transformStamped = TransformStamped()
 		static_transformStamped.header.stamp = rospy.Time.now()
 		static_transformStamped.header.frame_id = self.base_frame
@@ -63,14 +64,14 @@ class CameraPoseEstimator():
 		static_transformStamped.transform.rotation.z = 0.0
 		static_transformStamped.transform.rotation.w = 1.0
 		for i in range(len(self.tags_ids)):
-			tf_static_publisher =  tf2_ros.StaticTransformBroadcaster()
+			self.tf_static_publishers.append(tf2_ros.StaticTransformBroadcaster())
 			tag_id = self.tags_ids[i]
 			tag_x = self.tags_x[i]
 			tag_y = self.tags_y[i]
 			static_transformStamped.child_frame_id = f'{self.tag_frame_prefix}{tag_id}'
 			static_transformStamped.transform.translation.x = tag_x
 			static_transformStamped.transform.translation.y = tag_y
-			tf_static_publisher.sendTransform(static_transformStamped)
+			self.tf_static_publishers[i].sendTransform(static_transformStamped)
 
 	def init_tf(self):
 		# self.tf_broadcasters = {}
@@ -130,8 +131,8 @@ class CameraPoseEstimator():
 				t.header.stamp = rospy.Time.now()
 				t.header.frame_id = self.base_frame
 				t.child_frame_id = self.camera_frame
-				t.transform.translation.x = trans_inv[0] + self.tags_x_dict[tag_id]
-				t.transform.translation.y = trans_inv[1] + self.tags_y_dict[tag_id]
+				t.transform.translation.x = trans_inv[0]# + self.tags_x_dict[tag_id]
+				t.transform.translation.y = trans_inv[1]# + self.tags_y_dict[tag_id]
 				t.transform.translation.z = trans_inv[2]
 				t.transform.rotation.x = rot_inv_quat[0]
 				t.transform.rotation.y = rot_inv_quat[1]
