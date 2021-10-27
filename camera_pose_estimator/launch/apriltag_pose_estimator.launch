@@ -1,0 +1,8 @@
+<launch>
+    <!-- <arg name="launch_prefix" default="" /> set to value="gdbserver localhost:10000" for remote debugging -->
+    <!-- <arg name="launch_prefix" default="" /> -->
+    <arg name="node_namespace" default="apriltag_pose_estimator" />
+    <rosparam command="load" file="$(find camera_pose_estimator)/config/camera_pose_estimator_params.yaml" ns="$(arg node_namespace)" />
+    <node pkg="camera_pose_estimator" type="apriltags_tf" name="$(arg node_namespace)"  output="screen" />
+</launch>
+
