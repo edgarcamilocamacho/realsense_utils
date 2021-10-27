@@ -1,0 +1,16 @@
+{
+    "python.linting.enabled": false,
+    "python.analysis.extraPaths": [
+        "/opt/ros/foxy/lib/python3.8/site-packages",
+        "${workspaceFolder}/install/raya_msgs/lib/python3.8/site-packages",
+        "${workspaceFolder}/install/apriltag_msgs/lib/python3.8/site-packages",
+    ],
+    "python.linting.pylintEnabled": true,
+    "ros.distro": "foxy",
+    "python.autoComplete.extraPaths": [
+        "/home/camilo/ur/raya2_ws/install/raya_tests/lib/python3.8/site-packages",
+        "/home/camilo/ur/raya2_ws/install/raya_msgs/lib/python3.8/site-packages",
+        "/home/camilo/ur/raya2_ws/install/raya_bridge/lib/python3.8/site-packages",
+        "/opt/ros/foxy/lib/python3.8/site-packages"
+    ]
+}
