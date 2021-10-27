@@ -42,14 +42,14 @@ def generate_launch_description():
             }.items(),
         ))
     
-    to_launch.append(Node(
-            package='camera_pose_estimator',
-            executable='camera_pose_estimator',
-            parameters = [config],
-            name='camera_pose_estimator',
-            output='screen',
-            emulate_tty=True,
-        ))
+    # to_launch.append(Node(
+    #         package='camera_pose_estimator',
+    #         executable='camera_pose_estimator',
+    #         parameters = [config],
+    #         name='camera_pose_estimator',
+    #         output='screen',
+    #         emulate_tty=True,
+    #     ))
 
     to_launch.append(Node( package='rviz2', executable='rviz2', name='rviz2',
             arguments=['-d', rviz_config, '--ros-args', '--log-level', 'error'],
