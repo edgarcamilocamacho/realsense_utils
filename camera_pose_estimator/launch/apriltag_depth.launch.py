@@ -6,7 +6,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 
 
-rviz_config = os.path.join(pkgpath('raya_cameras'), 'rviz', 'realsense_apriltag.rviz')
+rviz_config = os.path.join(pkgpath('camera_pose_estimator'), 'rviz', 'realsense_apriltag.rviz')
 
 
 def generate_launch_description():

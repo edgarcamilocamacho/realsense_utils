@@ -27,6 +27,7 @@ setup(
         'console_scripts': [
             'camera_pose_estimator = camera_pose_estimator.camera_pose_estimator:main',
             'apriltag_depth = camera_pose_estimator.apriltag_depth:main',
+            'cubes = camera_pose_estimator.cubes:main',
         ],
     },
 )
